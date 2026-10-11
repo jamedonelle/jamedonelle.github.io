@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import EmptyState from '../../components/EmptyState.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const books = await getCollection('books');
+const groups = [
+  { label: 'Currently reading', items: books.filter((b) => b.data.status === 'reading') },
+  {
+    label: 'Finished',
+    items: books
+      .filter((b) => b.data.status === 'finished')
+      .sort((a, b) => (b.data.finished?.valueOf() ?? 0) - (a.data.finished?.valueOf() ?? 0)),
+  },
+  { label: 'To read', items: books.filter((b) => b.data.status === 'to-read') },
+].filter((g) => g.items.length > 0);
+
+const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');
+---
+
+<Base title="Books">
+  <h1>Books</h1>
+  {groups.length === 0 && <EmptyState what="books" variant="books" />}
+  {groups.map((g) => (
+    <section>
+      <h2>{g.label}</h2>
+      <ul class="list">
+        {g.items.map((b) => (
+          <li>
+            <h3><a href={`${base}/books/${b.id}/`}>{b.data.title}</a></h3>
+            <span class="meta">{b.data.author} {b.data.rating ? `· ${stars(b.data.rating)}` : ''}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>

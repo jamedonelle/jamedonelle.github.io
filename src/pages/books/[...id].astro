@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const books = await getCollection('books');
+  return books.map((book) => ({ params: { id: book.id }, props: { book } }));
+}
+
+const { book } = Astro.props;
+const { Content } = await render(book);
+const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');
+---
+
+<Base title={book.data.title}>
+  <article>
+    <h1>{book.data.title}</h1>
+    <p class="meta">
+      by {book.data.author}
+      {book.data.rating && <> · {stars(book.data.rating)}</>}
+      {book.data.finished && <> · finished {book.data.finished.toLocaleDateString('en-US', { dateStyle: 'long' })}</>}
+    </p>
+    <Content />
+  </article>
+</Base>

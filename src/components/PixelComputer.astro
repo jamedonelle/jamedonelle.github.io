@@ -1,0 +1,117 @@
+---
+interface Props {
+  scale?: number;
+}
+const { scale = 8 } = Astro.props;
+---
+
+<canvas
+  class="pixel-art pixel-computer"
+  width="20"
+  height="16"
+  style={`width:${20 * scale}px`}
+  aria-hidden="true"></canvas>
+
+<script>
+  import { drawSprite, px } from '../scripts/pixel';
+
+  const W = 20;
+  const H = 16;
+  // 'S' is the screen; its contents are drawn separately.
+  const sprite = [
+    '..ffffffffffffffff..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..fSSSSSSSSSSSSSSf..',
+    '..ffffffffffffffff..',
+    '..ffffffffffffgfff..',
+    '........ffff........',
+    '......ffffffff......',
+    '....................',
+    '..kjkjkjkjkjkjkjkj..',
+    '..kkkkkkkkkkkkkkkk..',
+  ];
+  const colors = { f: '#d8d3c4', S: '#14261a', g: '#4fbf5f', k: '#2b3526', j: '#6b7a63' };
+  const textLines = [12, 8, 11]; // pixel length of each typed line
+  const total = textLines.reduce((a, b) => a + b, 0);
+  const ink = '#2f4a2a';
+  const glow = '#7bd88f';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas.pixel-computer').forEach((canvas) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let active = false;
+    let typed = 0;
+    let hold = 0;
+    let tick = 0;
+    let touchTimer: number | undefined;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      drawSprite(ctx, sprite, colors);
+      const blink = reduce || Math.floor(tick / 6) % 2 === 0;
+
+      if (!active) {
+        // Idle: a dark terminal with a prompt and blinking cursor.
+        px(ctx, 4, 3, glow);
+        px(ctx, 5, 4, glow);
+        px(ctx, 4, 5, glow);
+        if (blink) px(ctx, 7, 5, glow, 2, 1);
+        return;
+      }
+
+      // Hovered: the screen lights up and a post types itself out.
+      px(ctx, 3, 1, '#cfe8c0', 14, 8);
+      px(ctx, 3, 1, ink, 14, 1);
+      let left = typed;
+      textLines.forEach((len, i) => {
+        const n = Math.min(len, left);
+        left -= n;
+        const y = 3 + i * 2;
+        if (n > 0) px(ctx, 4, y, ink, n, 1);
+        if (n < len && left === 0 && blink && typed < total) px(ctx, 4 + n, y, ink);
+      });
+    };
+
+    const step = () => {
+      tick++;
+      if (active) {
+        if (typed < total) typed++;
+        else if (++hold > 20) {
+          typed = 0;
+          hold = 0;
+        }
+      }
+      draw();
+    };
+
+    canvas.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') {
+        active = true;
+        typed = 0;
+        hold = 0;
+      }
+    });
+    canvas.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') active = false;
+    });
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse') return;
+      active = true;
+      typed = 0;
+      hold = 0;
+      window.clearTimeout(touchTimer);
+      touchTimer = window.setTimeout(() => (active = false), 4000);
+    });
+
+    draw();
+    window.setInterval(step, 70);
+  });
+</script>

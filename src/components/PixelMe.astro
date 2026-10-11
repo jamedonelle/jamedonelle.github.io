@@ -1,0 +1,85 @@
+---
+interface Props {
+  size?: number;
+}
+const { size = 168 } = Astro.props;
+---
+
+<canvas class="pixel-me" width="14" height="14" style={`width:${size}px;height:${size}px`} aria-hidden="true"
+></canvas>
+
+<script>
+  import { drawSprite, px } from '../scripts/pixel';
+
+  // 14x14 portrait. 'e' marks the two 3x3 eyes: a pupil moves inside them to follow the cursor.
+  const sprite = [
+    '....hhhhhh....',
+    '...hhhhhhhh...',
+    '..hhhhhhhhhh..',
+    '..hssssssssh..',
+    '..seeesseees..',
+    '..seeesseees..',
+    '..seeesseees..',
+    '..ssssssssss..',
+    '..ssmssssmss..',
+    '..sssmmmmsss..',
+    '...ssssssss...',
+    '..cccccccccc..',
+    '.cccccccccccc.',
+    'cccccccccccccc',
+  ];
+  const colors = { h: '#2b3526', s: '#f1d3b3', e: '#fdfcf9', m: '#7a3b2e', c: '#2f4a2a' };
+  const eyes = [3, 8]; // left edge of each eye, rows 4-6
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas.pixel-me').forEach((canvas) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let dx = 0;
+    let dy = 0;
+    let blink = false;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, 14, 14);
+      drawSprite(ctx, sprite, colors);
+      if (blink) {
+        eyes.forEach((x) => {
+          px(ctx, x, 4, colors.s, 3, 3);
+          px(ctx, x, 5, colors.h, 3, 1);
+        });
+        return;
+      }
+      eyes.forEach((x) => px(ctx, x + 1 + dx, 5 + dy, '#1c1c1e'));
+    };
+
+    const look = (clientX: number, clientY: number) => {
+      const r = canvas.getBoundingClientRect();
+      const vx = clientX - (r.left + r.width / 2);
+      const vy = clientY - (r.top + r.height * 0.4);
+      const dead = r.width * 0.25;
+      dx = Math.abs(vx) < dead ? 0 : Math.sign(vx);
+      dy = Math.abs(vy) < dead ? 0 : Math.sign(vy);
+      draw();
+    };
+
+    window.addEventListener('pointermove', (e) => look(e.clientX, e.clientY));
+    window.addEventListener('pointerdown', (e) => look(e.clientX, e.clientY));
+
+    if (!reduce) {
+      const scheduleBlink = () =>
+        setTimeout(() => {
+          blink = true;
+          draw();
+          setTimeout(() => {
+            blink = false;
+            draw();
+            scheduleBlink();
+          }, 140);
+        }, 2500 + Math.random() * 3000);
+      scheduleBlink();
+    }
+
+    draw();
+  });
+</script>

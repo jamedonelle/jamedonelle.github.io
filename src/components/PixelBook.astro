@@ -1,0 +1,97 @@
+---
+interface Props {
+  scale?: number;
+}
+const { scale = 8 } = Astro.props;
+---
+
+<canvas
+  class="pixel-art pixel-book"
+  width="22"
+  height="14"
+  style={`width:${22 * scale}px`}
+  aria-hidden="true"></canvas>
+
+<script>
+  import { px } from '../scripts/pixel';
+
+  const W = 22;
+  const H = 14;
+  const cover = '#7a3b2e';
+  const page = '#f6efd0';
+  const spine = '#cfc49a';
+  const sheet = '#fffdf3';
+  const ink = '#b9ad7a';
+  const rows = [4, 6, 8, 10];
+  // Line lengths for each spread (left page, right page).
+  const left = [[7, 6, 7, 4], [6, 7, 5, 7], [7, 5, 7, 6]];
+  const right = [[6, 7, 5, 7], [7, 7, 4, 6], [5, 7, 7, 3]];
+  // The turning sheet is hinged at the spine; each frame is how far its free edge has travelled.
+  const frames = [
+    { side: 'R', edge: 17 },
+    { side: 'R', edge: 14 },
+    { side: 'V', edge: 11 },
+    { side: 'L', edge: 6 },
+    { side: 'L', edge: 3 },
+    { side: 'L', edge: 1 },
+  ] as const;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas.pixel-book').forEach((canvas) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let spread = 0;
+    let frame = -1; // -1 = at rest
+    let wait = 0;
+
+    const lines = (x: number, lens: number[]) =>
+      lens.forEach((len, i) => px(ctx, x, rows[i], ink, len, 1));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      px(ctx, 0, 1, cover, 22, 12);
+      px(ctx, 1, 2, page, 9, 10);
+      px(ctx, 12, 2, page, 9, 10);
+      px(ctx, 10, 2, spine, 2, 10);
+
+      const next = (spread + 1) % left.length;
+      lines(2, left[spread]);
+      // While a sheet is turning, the next right-hand page is revealed beneath it.
+      lines(13, right[frame >= 0 ? next : spread]);
+
+      if (frame < 0) return;
+      const f = frames[frame];
+      if (f.side === 'R') {
+        px(ctx, 12, 1, sheet, f.edge - 11, 11);
+        px(ctx, f.edge, 1, spine, 1, 11);
+      } else if (f.side === 'V') {
+        px(ctx, 10, 0, sheet, 2, 11);
+      } else {
+        px(ctx, f.edge, 1, sheet, 10 - f.edge, 11);
+        px(ctx, f.edge, 1, spine, 1, 11);
+      }
+    };
+
+    const step = () => {
+      if (frame >= 0) {
+        frame++;
+        if (frame >= frames.length) {
+          frame = -1;
+          spread = (spread + 1) % left.length;
+        }
+      } else if (!reduce && ++wait >= 34) {
+        wait = 0;
+        frame = 0;
+      }
+      draw();
+    };
+
+    // Click or tap to turn the page right away.
+    canvas.addEventListener('pointerdown', () => {
+      if (frame < 0) frame = 0;
+    });
+    draw();
+    window.setInterval(step, 90);
+  });
+</script>
