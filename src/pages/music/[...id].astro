@@ -17,9 +17,9 @@ const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');
     <h1>{entry.data.title}</h1>
     <p class="meta">
       {entry.data.artist}
-      {entry.data.year && <> · {entry.data.year}</>}
+      {entry.data.year && <>{entry.data.artist && ' · '}{entry.data.year}</>}
       {entry.data.rating && <> · {stars(entry.data.rating)}</>}
-      {entry.data.link && <> · <a href={entry.data.link}>Listen</a></>}
+      {entry.data.link && <>{(entry.data.artist || entry.data.year) && ' · '}<a href={entry.data.link}>Listen</a></>}
     </p>
     <Content />
   </article>

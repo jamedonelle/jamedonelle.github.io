@@ -84,25 +84,25 @@ footer.site .wrap { padding-block: 2rem; }
 .empty-sub { color: var(--muted); margin: 0 0 1.5rem; }
 .empty-link { font-weight: 700; }
 
-.book-grid {
+.cover-grid {
   list-style: none; padding: 0; margin: 1.5rem 0 3rem;
   display: grid; gap: 2rem 1.5rem; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
 }
-.book-card { display: flex; flex-direction: column; gap: 0.25rem; }
-.book-link { display: flex; flex-direction: column; gap: 0.75rem; color: var(--fg); text-decoration: none; }
-.book-cover {
+.cover-card { display: flex; flex-direction: column; gap: 0.25rem; }
+.cover-link { display: flex; flex-direction: column; gap: 0.75rem; color: var(--fg); text-decoration: none; }
+.cover {
   display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover;
   border-radius: 0.35rem; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.book-link:hover .book-cover, .book-link:focus-visible .book-cover {
+.cover-link:hover .cover, .cover-link:focus-visible .cover {
   transform: translateY(-4px); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
 }
-.book-cover-blank {
+.cover-blank {
   display: grid; place-items: center; padding: 1rem; text-align: center;
   background: var(--accent); color: var(--bg); font-weight: 700;
 }
-.book-title { font-weight: 700; line-height: 1.3; }
+.cover-title { font-weight: 700; line-height: 1.3; }
 .stars { letter-spacing: 0.1em; }
 
 .wrap.wide { max-width: 72rem; }
@@ -110,18 +110,18 @@ footer.site .wrap { padding-block: 2rem; }
 .wrap.narrow > * { width: 100%; max-width: 44rem; margin-inline: auto; }
 
 /* Two columns on wide screens: a big "currently reading" next to the shelf. */
-.book-columns { margin-top: 2.5rem; }
-.book-columns section h2 { margin-top: 0; }
+.split { margin-top: 2.5rem; }
+.split section h2 { margin-top: 0; }
 @media (min-width: 60rem) {
-  .book-columns:not(.single) {
+  .split:not(.single) {
     display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     gap: 4rem; align-items: start;
   }
 }
 
 /* Currently reading: large covers */
-.book-grid.big { grid-template-columns: repeat(auto-fill, minmax(14rem, 18rem)); gap: 2rem; }
-.book-grid.big .book-title { font-size: 1.35rem; }
+.cover-grid.big { grid-template-columns: repeat(auto-fill, minmax(14rem, 18rem)); gap: 2rem; }
+.cover-grid.big .cover-title { font-size: 1.35rem; }
 
 /* Read this year: covers standing on a blocky wooden shelf */
 .shelf-frame {
@@ -160,25 +160,25 @@ footer.site .wrap { padding-block: 2rem; }
 }
 
 /* The page-turning book sits between the two sections */
-.book-middle { display: flex; justify-content: center; align-self: center; }
-.book-middle .pixel-art { margin: 0; max-width: none; }
+.split-middle { display: flex; justify-content: center; align-self: center; }
+.split-middle .pixel-art { margin: 0; max-width: none; }
 @media (min-width: 60rem) {
   /* the side columns hug their content, so the book centres in the gap between them */
-  .book-columns:not(.single) { grid-template-columns: 18rem minmax(0, 1fr) minmax(0, 28rem); gap: 2rem; }
+  .split:not(.single) { grid-template-columns: 18rem minmax(0, 1fr) minmax(0, 28rem); gap: 2rem; }
   /* no trailing margin, so the book centres on the content and not on the empty space below it */
-  .book-columns:not(.single) .book-grid { margin-bottom: 0; }
+  .split:not(.single) .cover-grid { margin-bottom: 0; }
 }
 
 /* Phones and narrow windows: sections stack, so centre everything on the screen */
 @media (max-width: 59.99rem) {
-  .books-title { text-align: center; }
-  .book-columns { display: grid; justify-items: center; gap: 2.5rem; }
-  .book-columns section { width: 100%; text-align: center; }
-  .book-grid.big { grid-template-columns: minmax(0, 18rem); justify-content: center; }
-  .book-card { align-items: center; }
+  .page-title { text-align: center; }
+  .split { display: grid; justify-items: center; gap: 2.5rem; }
+  .split section { width: 100%; text-align: center; }
+  .cover-grid.big { grid-template-columns: minmax(0, 18rem); justify-content: center; }
+  .cover-card { align-items: center; }
   .shelf { justify-content: center; column-gap: 0.75rem; }
   .shelf-frame { max-width: 30rem; margin-inline: auto; }
-  .book-middle { justify-self: center; }
+  .split-middle { justify-self: center; }
 }
 
 /* Spotlight: a featured project under the intro */
@@ -194,3 +194,65 @@ footer.site .wrap { padding-block: 2rem; }
 .spotlight h2 { margin: 0 0 0.5rem; font-size: 1.75rem; }
 .spotlight p:not(.spotlight-label) { margin: 0 auto 1rem; max-width: 30rem; }
 .spotlight-link { font-weight: 800; }
+
+/* Music: on-repeat list, record shelf (square covers) and playlists */
+.repeat-list { list-style: none; padding: 0; margin: 1.5rem 0 0; display: grid; gap: 1.25rem; }
+.repeat-list li { display: flex; align-items: center; gap: 1rem; }
+.repeat-art { flex: none; display: block; width: 7rem; height: 7rem; }
+.repeat-art img, .repeat-art .cover-blank {
+  display: block; width: 100%; height: 100%; object-fit: cover; aspect-ratio: 1;
+  box-shadow: 0.3rem 0.3rem 0 rgba(0, 0, 0, 0.25);
+}
+.repeat-text { display: flex; flex-direction: column; gap: 0.15rem; text-align: left; }
+.repeat-text .cover-title { color: var(--fg); text-decoration: none; }
+.repeat-text .cover-title:hover { text-decoration: underline; }
+
+/* Favorite albums: loose sleeves with the record sliding out on hover */
+.sleeves {
+  list-style: none; padding: 0; margin: 1.5rem 0 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem;
+}
+.sleeves li { position: relative; }
+.sleeves li:hover, .sleeves li:focus-within { z-index: 2; }
+.sleeve { position: relative; display: block; aspect-ratio: 1; }
+.sleeve img, .sleeve-blank {
+  position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover;
+  box-shadow: 0.25rem 0.25rem 0 rgba(0, 0, 0, 0.3);
+}
+.sleeve-blank {
+  display: grid; place-items: center; padding: 0.4rem; text-align: center;
+  background: var(--accent); color: var(--bg); font-size: 0.7rem; font-weight: 700; line-height: 1.2;
+}
+.vinyl {
+  position: absolute; inset: 5%; border-radius: 50%;
+  background:
+    radial-gradient(circle, #c2410c 0 19%, #0b0b0c 19% 23%, transparent 23%),
+    repeating-radial-gradient(circle, #1c1c1e 0 2px, #2e2e33 2px 3px);
+  transition: transform 0.2s steps(5);
+}
+.sleeve:hover .vinyl, .sleeve:focus-visible .vinyl { transform: translateX(38%); }
+.sleeve-title {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-top: 0.45rem; font-size: 0.75rem; font-weight: 700; line-height: 1.25; text-align: center;
+}
+
+.playlists { margin-top: 3rem; }
+.playlist-grid {
+  list-style: none; padding: 0; margin: 1.5rem 0 0;
+  display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+}
+.playlist-card {
+  padding: 1rem 1.25rem; background: var(--card);
+  border: 3px solid var(--accent); box-shadow: 0.3rem 0.3rem 0 var(--accent);
+}
+.playlist-card h3 { margin: 0 0 0.25rem; font-size: 1.15rem; }
+.playlist-card p { margin: 0 0 0.75rem; }
+
+@media (max-width: 59.99rem) {
+  /* a centred block with one shared left edge, rather than each row centring on its own */
+  .repeat-list { width: fit-content; margin-inline: auto; }
+  .sleeves { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 24rem; margin-inline: auto; }
+  .playlists { text-align: center; }
+  .playlist-grid { justify-items: center; }
+  .playlist-card { width: 100%; max-width: 20rem; }
+}

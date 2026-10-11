@@ -29,8 +29,13 @@ const music = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/music' }),
   schema: z.object({
     title: z.string(),
-    artist: z.string(),
+    artist: z.string().optional(),
     kind: z.enum(['album', 'artist', 'playlist']).default('album'),
+    // Albums are either on repeat right now or part of the favorites shelf.
+    status: z.enum(['on-repeat', 'favorite']).default('favorite'),
+    cover: z.string().optional(),
+    description: z.string().optional(),
+    order: z.number().optional(),
     year: z.number().optional(),
     rating: z.number().min(1).max(5).optional(),
     link: z.string().url().optional(),

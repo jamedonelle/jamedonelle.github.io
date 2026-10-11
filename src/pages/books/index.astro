@@ -32,29 +32,29 @@ const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');
 ---
 
 <Base title="Books" wide>
-  <h1 class="books-title">Books</h1>
+  <h1 class="page-title">Books</h1>
   {groups.length === 0 && <EmptyState what="books" variant="books" />}
-  <div class:list={['book-columns', { single: groups.length < 2 }]}>
+  <div class:list={['split', { single: groups.length < 2 }]}>
     {groups.map((g, i) => (
       <>
         {i === 1 && (
-          <div class="book-middle">
+          <div class="split-middle">
             <PixelBook scale={7} />
           </div>
         )}
       <section>
         <h2>{g.label}</h2>
         {g.key === 'reading' ? (
-          <ul class="book-grid big">
+          <ul class="cover-grid big">
             {g.items.map((b) => (
-              <li class="book-card">
-                <a class="book-link" href={`${base}/books/${b.id}/`}>
+              <li class="cover-card">
+                <a class="cover-link" href={`${base}/books/${b.id}/`}>
                   {b.data.cover ? (
-                    <img class="book-cover" src={`${base}${b.data.cover}`} alt={`Cover of ${b.data.title}`} />
+                    <img class="cover" src={`${base}${b.data.cover}`} alt={`Cover of ${b.data.title}`} />
                   ) : (
-                    <div class="book-cover book-cover-blank">{b.data.title}</div>
+                    <div class="cover cover-blank">{b.data.title}</div>
                   )}
-                  <span class="book-title">{b.data.title}</span>
+                  <span class="cover-title">{b.data.title}</span>
                 </a>
                 <span class="meta">{b.data.author}</span>
               </li>

@@ -2,26 +2,122 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import EmptyState from '../../components/EmptyState.astro';
+import PixelRecordPlayer from '../../components/PixelRecordPlayer.astro';
+import { albumCover } from '../../lib/covers';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const entries = (await getCollection('music')).sort((a, b) =>
-  a.data.artist.localeCompare(b.data.artist),
+const entries = await getCollection('music');
+const albums = entries.filter((e) => e.data.kind === 'album');
+
+// On repeat keeps the order it was given; favorites group by artist, oldest album first.
+const onRepeat = albums
+  .filter((a) => a.data.status === 'on-repeat')
+  .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+const favorites = albums
+  .filter((a) => a.data.status === 'favorite')
+  .sort(
+    (a, b) =>
+      (a.data.artist ?? '').localeCompare(b.data.artist ?? '') ||
+      (a.data.year ?? 0) - (b.data.year ?? 0) ||
+      a.data.title.localeCompare(b.data.title),
+  );
+const playlists = entries
+  .filter((e) => e.data.kind === 'playlist')
+  .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+
+const topSections = [onRepeat, favorites].filter((s) => s.length > 0);
+
+// Album art is looked up at build time; a `cover:` in the file overrides it.
+const coverFor = new Map<string, string | undefined>(
+  await Promise.all(
+    [...onRepeat, ...favorites].map(async (a) => {
+      const own = a.data.cover;
+      if (own) return [a.id, own.startsWith('http') ? own : `${base}${own}`] as const;
+      const found = a.data.artist ? await albumCover(a.data.artist, a.data.title, a.data.year) : undefined;
+      return [a.id, found] as const;
+    }),
+  ),
 );
-const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');
 ---
 
-<Base title="Music">
-  <h1>Music</h1>
+<Base title="Music" wide>
+  <h1 class="page-title">Music</h1>
   {entries.length === 0 && <EmptyState what="music" variant="music" />}
-  <ul class="list">
-    {entries.map((m) => (
-      <li>
-        <h3><a href={`${base}/music/${m.id}/`}>{m.data.title}</a></h3>
-        <span class="meta">
-          {m.data.artist}{m.data.year ? ` · ${m.data.year}` : ''} · {m.data.kind}
-          {m.data.rating ? ` · ${stars(m.data.rating)}` : ''}
-        </span>
-      </li>
-    ))}
-  </ul>
+
+  {topSections.length > 0 && (
+    <div class:list={['split', { single: topSections.length < 2 }]}>
+      {onRepeat.length > 0 && (
+        <section>
+          <h2>On repeat</h2>
+          <ul class="repeat-list">
+            {onRepeat.map((a) => (
+              <li>
+                <a class="repeat-art" href={`${base}/music/${a.id}/`}>
+                  {coverFor.get(a.id) ? (
+                    <img src={coverFor.get(a.id)} alt={`Cover of ${a.data.title}`} />
+                  ) : (
+                    <span class="cover-blank">{a.data.title}</span>
+                  )}
+                </a>
+                <div class="repeat-text">
+                  <a class="cover-title" href={`${base}/music/${a.id}/`}>{a.data.title}</a>
+                  <span class="meta">{a.data.artist}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {onRepeat.length > 0 && favorites.length > 0 && (
+        <div class="split-middle">
+          <PixelRecordPlayer scale={7} />
+        </div>
+      )}
+
+      {favorites.length > 0 && (
+        <section>
+          <h2>Favorite albums</h2>
+          <ul class="sleeves">
+            {favorites.map((a) => (
+              <li>
+                <a
+                  class="sleeve"
+                  href={`${base}/music/${a.id}/`}
+                  title={`${a.data.title} · ${a.data.artist}${a.data.year ? ` · ${a.data.year}` : ''}`}
+                >
+                  <span class="vinyl" aria-hidden="true"></span>
+                  {coverFor.get(a.id) ? (
+                    <img src={coverFor.get(a.id)} alt={`Cover of ${a.data.title}`} loading="lazy" />
+                  ) : (
+                    <span class="sleeve-blank">{a.data.title}</span>
+                  )}
+                </a>
+                <span class="sleeve-title">{a.data.title}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  )}
+
+  {playlists.length > 0 && (
+    <section class="playlists">
+      <h2>Playlists</h2>
+      <ul class="playlist-grid">
+        {playlists.map((p) => (
+          <li class="playlist-card">
+            <h3>{p.data.title}</h3>
+            {p.data.description && <p>{p.data.description}</p>}
+            {p.data.link ? (
+              <a href={p.data.link} target="_blank" rel="noopener noreferrer">Listen →</a>
+            ) : (
+              <span class="meta">Link coming soon</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 </Base>
