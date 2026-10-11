@@ -2,37 +2,87 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import EmptyState from '../../components/EmptyState.astro';
+import PixelBook from '../../components/PixelBook.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const books = await getCollection('books');
+// Newest finish date first; books without a date follow, alphabetically.
+const byFinished = (a: (typeof books)[number], b: (typeof books)[number]) => {
+  const da = a.data.finished?.valueOf();
+  const db = b.data.finished?.valueOf();
+  if (da !== undefined && db !== undefined) return db - da;
+  if (da !== undefined) return -1;
+  if (db !== undefined) return 1;
+  return a.data.title.localeCompare(b.data.title);
+};
 const groups = [
-  { label: 'Currently reading', items: books.filter((b) => b.data.status === 'reading') },
   {
-    label: 'Finished',
-    items: books
-      .filter((b) => b.data.status === 'finished')
-      .sort((a, b) => (b.data.finished?.valueOf() ?? 0) - (a.data.finished?.valueOf() ?? 0)),
+    key: 'reading',
+    label: 'Currently reading',
+    items: books.filter((b) => b.data.status === 'reading'),
   },
-  { label: 'To read', items: books.filter((b) => b.data.status === 'to-read') },
+  {
+    key: 'finished',
+    label: 'Previously read',
+    items: books.filter((b) => b.data.status === 'finished').sort(byFinished),
+  },
 ].filter((g) => g.items.length > 0);
 
 const stars = (n?: number) => (n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '');
 ---
 
-<Base title="Books">
-  <h1>Books</h1>
+<Base title="Books" wide>
+  <h1 class="books-title">Books</h1>
   {groups.length === 0 && <EmptyState what="books" variant="books" />}
-  {groups.map((g) => (
-    <section>
-      <h2>{g.label}</h2>
-      <ul class="list">
-        {g.items.map((b) => (
-          <li>
-            <h3><a href={`${base}/books/${b.id}/`}>{b.data.title}</a></h3>
-            <span class="meta">{b.data.author} {b.data.rating ? `· ${stars(b.data.rating)}` : ''}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  ))}
+  <div class:list={['book-columns', { single: groups.length < 2 }]}>
+    {groups.map((g, i) => (
+      <>
+        {i === 1 && (
+          <div class="book-middle">
+            <PixelBook scale={7} />
+          </div>
+        )}
+      <section>
+        <h2>{g.label}</h2>
+        {g.key === 'reading' ? (
+          <ul class="book-grid big">
+            {g.items.map((b) => (
+              <li class="book-card">
+                <a class="book-link" href={`${base}/books/${b.id}/`}>
+                  {b.data.cover ? (
+                    <img class="book-cover" src={`${base}${b.data.cover}`} alt={`Cover of ${b.data.title}`} />
+                  ) : (
+                    <div class="book-cover book-cover-blank">{b.data.title}</div>
+                  )}
+                  <span class="book-title">{b.data.title}</span>
+                </a>
+                <span class="meta">{b.data.author}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div class="shelf-frame">
+            <ul class="shelf">
+              {g.items.map((b) => (
+                <li>
+                  <a
+                    class="spine"
+                    href={`${base}/books/${b.id}/`}
+                    title={`${b.data.title} · ${b.data.author}${b.data.rating ? ` · ${stars(b.data.rating)}` : ''}`}
+                  >
+                    {b.data.cover ? (
+                      <img src={`${base}${b.data.cover}`} alt={`Cover of ${b.data.title}`} loading="lazy" />
+                    ) : (
+                      <span class="spine-blank">{b.data.title}</span>
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+      </>
+    ))}
+  </div>
 </Base>
