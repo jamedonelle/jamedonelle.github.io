@@ -17,7 +17,7 @@ body {
   flex-direction: column;
   background: var(--bg);
   color: var(--fg);
-  font: 500 1.125rem/1.8 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font: 500 1.15rem/1.8 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, Cambria, 'Times New Roman', serif;
 }
 
 a { color: var(--accent); text-underline-offset: 3px; }
@@ -41,10 +41,10 @@ h2 { margin-top: 2rem; }
 .lede { color: var(--fg); font-size: 1.35rem; font-weight: 600; line-height: 1.6; margin-top: 0; }
 .meta { color: var(--muted); font-size: 0.9rem; }
 
-ul.list { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1rem; }
+ul.list { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1.5rem; }
 ul.list li {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 0.6rem; padding: 1rem 1.1rem;
+  background: var(--card); padding: 1rem 1.25rem;
+  border: 3px solid var(--accent); box-shadow: 0.3rem 0.3rem 0 var(--accent);
 }
 ul.list h3 { margin: 0 0 0.25rem; font-size: 1.1rem; }
 ul.list p { margin: 0.25rem 0 0; }
@@ -255,4 +255,60 @@ footer.site .wrap { padding-block: 2rem; }
   .playlists { text-align: center; }
   .playlist-grid { justify-items: center; }
   .playlist-card { width: 100%; max-width: 20rem; }
+}
+
+/* Book / album detail pages: cover next to title and author or artist */
+.detail-head { display: flex; align-items: flex-end; gap: 1.75rem; margin-bottom: 2rem; }
+.detail-cover {
+  flex: none; width: 11rem; aspect-ratio: 1; object-fit: cover;
+  border-radius: 0.35rem; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.detail-cover.book { aspect-ratio: 2 / 3; }
+.detail-text h1 { margin-bottom: 0.25rem; }
+.detail-by { margin: 0 0 0.5rem; font-size: 1.2rem; font-weight: 600; }
+@media (max-width: 36rem) {
+  .detail-head { flex-direction: column; align-items: center; text-align: center; }
+}
+
+/* Blog posts */
+.wrap.narrow > .post { max-width: 38rem; }
+.post { font-size: 1.2rem; line-height: 1.85; }
+.post-head { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 3px solid var(--accent); }
+.post-head h1 { font-size: clamp(2.2rem, 6vw, 3rem); line-height: 1.1; margin-bottom: 0.75rem; }
+.post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; }
+.post-meta .tag { margin-right: 0; }
+
+.post h2 { font-size: 1.6rem; line-height: 1.25; margin: 2.5rem 0 0.75rem; }
+.post h3 { font-size: 1.25rem; margin: 2rem 0 0.5rem; }
+.post p, .post ul, .post ol { margin: 0 0 1.25rem; }
+.post li + li { margin-top: 0.35rem; }
+.post img { display: block; max-width: 100%; height: auto; margin: 2rem auto; box-shadow: 0.3rem 0.3rem 0 rgba(0, 0, 0, 0.25); }
+.post blockquote {
+  margin: 2rem 0; padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 4px solid var(--accent); font-style: italic;
+}
+.post blockquote p:last-child { margin-bottom: 0; }
+.post hr { border: 0; border-top: 3px solid var(--accent); width: 4rem; margin: 2.5rem auto; }
+.post code {
+  font: 0.9em ui-monospace, 'Cascadia Code', Consolas, monospace;
+  background: var(--card); border: 1px solid var(--border); padding: 0.1rem 0.35rem;
+}
+.post pre {
+  margin: 2rem 0; padding: 1rem 1.25rem; overflow-x: auto; line-height: 1.55;
+  background: var(--card); border: 3px solid var(--accent); box-shadow: 0.3rem 0.3rem 0 var(--accent);
+}
+.post pre code { background: none; border: 0; padding: 0; }
+
+.post-nav {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  margin-top: 3.5rem; padding-top: 1.5rem; border-top: 3px solid var(--accent);
+}
+.post-nav a { display: flex; flex-direction: column; gap: 0.15rem; font-weight: 700; line-height: 1.35; text-decoration: none; }
+.post-nav a:hover .post-nav-title { text-decoration: underline; }
+.post-nav .next { grid-column: 2; text-align: right; }
+.post-nav-label { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
+.post-all { margin-top: 2rem; text-align: center; font-weight: 700; }
+@media (max-width: 36rem) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-nav .next { grid-column: 1; text-align: left; }
 }
