@@ -312,3 +312,21 @@ footer.site .wrap { padding-block: 2rem; }
   .post-nav { grid-template-columns: 1fr; }
   .post-nav .next { grid-column: 1; text-align: left; }
 }
+
+/* Friends: a small card pinned to the bottom left, under the spotlight */
+/* breaks out of the narrow text column so it lines up with the logo in the header */
+.wrap.narrow > .friends { max-width: none; margin-inline: 0; margin-top: 2.5rem; text-align: left; }
+.friends .spotlight-label { margin-bottom: 0.5rem; }
+.friends ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+.friends a {
+  /* Bill's palette: navy button, orange text, cream border */
+  --btn-bg: #19304d; --btn-fg: #f5f4ed; --btn-accent: #ff9147; --btn-shadow: #0f1d2e;
+  display: inline-block; padding: 0.5rem 1rem; font-weight: 800; text-decoration: none;
+  color: var(--btn-accent); background: var(--btn-bg);
+  border: 3px solid var(--btn-fg); box-shadow: 0.25rem 0.25rem 0 var(--btn-shadow);
+  transition: transform 0.1s steps(2), box-shadow 0.1s steps(2), background 0.1s steps(2), color 0.1s steps(2);
+}
+.friends a:hover, .friends a:focus-visible {
+  transform: translate(-0.15rem, -0.15rem); box-shadow: 0.4rem 0.4rem 0 var(--btn-shadow);
+  background: var(--btn-accent); color: var(--btn-shadow);
+}
